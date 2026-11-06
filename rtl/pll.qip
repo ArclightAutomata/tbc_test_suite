@@ -1,0 +1,3 @@
+# SPDX-License-Identifier: GPL-2.0-or-later
+set_global_assignment -name VERILOG_FILE [file join $::quartus(qip_path) pll.v]
+set_global_assignment -name QIP_FILE [file join $::quartus(qip_path) pll/pll_0002.qip]

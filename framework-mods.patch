@@ -1,0 +1,33 @@
+diff --git a/sys/sys_top.v b/sys/sys_top.v
+--- a/sys/sys_top.v
++++ b/sys/sys_top.v
+@@ -1373,7 +1373,13 @@
+ 	.clk(clk_vid),
+ 
+ 	.scanlines(scanlines),
+-	.din(de_emu ? {r_out, g_out, b_out} : 24'd0),
++	// TBC_TEST_SUITE FRAMEWORK MOD #2: do not force black outside DE.
++	// The core embeds the NTSC color burst in the blanking interval of
++	// its self-encoded C channel; the stock gating zeroed it before the
++	// DAC, which killed CRT color lock while active-area chroma passed.
++	// Stock line:
++	// .din(de_emu ? {r_out, g_out, b_out} : 24'd0),
++	.din({r_out, g_out, b_out}),
+ 	.hs_in(hs_fix),
+ 	.vs_in(vs_fix),
+ 	.de_in(de_emu),
+@@ -1410,7 +1416,13 @@
+ );
+ 
+ wire vga_cs_osd;
+-csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
++// TBC_TEST_SUITE FRAMEWORK MOD #3: pass the core's composite sync through.
++// The core generates standard NTSC/PAL composite sync itself (half-line
++// equalizing and serrated broad pulses, half-line interlace offset) and
++// drives it on HS; with the vsync input held low this combiner passes it
++// unchanged. VS still feeds the OSD and scaler as usual. Stock line:
++// csync csync_vga(clk_vid, vga_hs_osd, vga_vs_osd, vga_cs_osd);
++csync csync_vga(clk_vid, vga_hs_osd, 1'b0, vga_cs_osd);
+ 
+ `ifndef MISTER_DISABLE_YC
+ 	reg         pal_en;
